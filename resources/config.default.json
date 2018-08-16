@@ -1,0 +1,21 @@
+{
+  "atlas": {
+    "pdo": {
+      "connection_locator": {
+        "default": {
+          "dsn": null,
+          "username": null,
+          "password": null
+        },
+        "read": {},
+        "write": {}
+      }
+    },
+    "orm": {
+      "atlas": {
+         "transaction_class": "Atlas\\Orm\\Transaction\\AutoTransact",
+         "log_queries": "%berlioz.debug%"
+      }
+    }
+  }
+}

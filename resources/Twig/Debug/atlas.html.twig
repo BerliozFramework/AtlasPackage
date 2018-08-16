@@ -1,0 +1,113 @@
+{% extends "@Berlioz-HttpCore/Twig/Debug/_main.html.twig" %}
+
+{% block menu %}
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+  </svg>
+  {{ section.sectionName }} ({{ section|length }})
+{% endblock %}
+
+{% block main %}
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1>{{ section.sectionName }}</h1>
+  </div>
+
+  <p>
+    It's a snapshot of database queries at the moment of request.
+  </p>
+
+  <div class="table-responsive">
+    <table class="table border-bottom">
+      <thead>
+      <tr>
+        <th>#</th>
+        <th>Connection</th>
+        <th>Duration</th>
+        <th>Statement</th>
+        <th>Values</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      {% set avgDuration = section.duration / (section.queries|length) %}
+      {% set limitWarning = avgDuration * 1.15 %}
+      {% set limitDanger = 0.1 %}
+      {% for query in section.queries %}
+        <tr class="{% if query.duration > limitDanger %}table-danger{% elseif query.duration > limitWarning %}table-warning{% endif %}">
+          <th>{{ loop.index }}</th>
+          <td>{{ query.connection }}</td>
+          <td>{{ (query.duration * 1000)|round(3) }}ms</td>
+          <td>
+            <pre class="mb-0"><code>{{ query.statement }}</code></pre>
+          </td>
+          <td>
+            {% if query.values|length > 0 %}
+              <table class="table table-sm table-bordered mb-0">
+                <thead>
+                <tr>
+                  <th scope="col">Key</th>
+                  <th scope="col">Value</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for key, value in query.values %}
+                  <tr>
+                    <th scope="row">{{ key }}</th>
+                    <td>{{ value }}</td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            {% else %}
+              --
+            {% endif %}
+          </td>
+          <td class="text-right">
+            <button class="btn btn-secondary" data-toggle="modal" data-target="#atlasDetail" data-detail="{{ query.trace|trim }}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </button>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="atlasDetail" tabindex="-1" role="dialog" aria-labelledby="atlasDetailTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="atlasDetailTitle">Statement trace</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <pre></pre>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block inlineJscripts %}
+  <script>
+    $('#atlasDetail')
+      .on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var recipient = button.data('detail');
+        var modal = $(this);
+
+        modal.find('.modal-body pre').html(recipient);
+      })
+  </script>
+{% endblock %}

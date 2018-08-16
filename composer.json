@@ -1,0 +1,42 @@
+{
+  "name": "berlioz/atlas-package",
+  "type": "berlioz-package",
+  "description": "Atlas.ORM package for Berlioz Framework",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "license": "MIT",
+  "homepage": "http://www.berlioz-framework.com",
+  "authors": [
+    {
+      "name": "Ronan Giron",
+      "email": "ronan.giron@berlioz-framework.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Berlioz\\Package\\Atlas\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Berlioz\\Package\\Atlas\\Tests\\": "tests/"
+    }
+  },
+  "require": {
+    "php": "^7.1",
+    "berlioz/core": "@dev",
+    "atlas/orm": "^3.0",
+    "atlas/cli": "^2.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^7.2",
+    "atlas/cli": "^2.0"
+  },
+  "config": {
+    "platform": {
+      "php": "7.1.0"
+    },
+    "optimize-autoloader": true,
+    "sort-packages": true
+  }
+}
