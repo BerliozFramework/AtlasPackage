@@ -1,4 +1,7 @@
 {
+  "commands": {
+    "atlas:skeleton": "\\Berlioz\\Package\\Atlas\\Command\\SkeletonCommand"
+  },
   "atlas": {
     "pdo": {
       "connection_locator": {
@@ -11,11 +14,39 @@
         "write": {}
       }
     },
+    "namespace": null,
+    "directory": "./src/DataSource",
     "orm": {
       "atlas": {
-         "transaction_class": "Atlas\\Orm\\Transaction\\AutoTransact",
-         "log_queries": "%berlioz.debug%"
+        "transaction_class": "Atlas\\Orm\\Transaction\\AutoTransact",
+        "log_queries": "%berlioz.debug%"
       }
+    },
+    "cli": {
+      "config": {
+        "input": {
+          "pdo": {
+            "dsn": "%atlas.pdo.connection_locator.default.dsn%",
+            "username": "%atlas.pdo.connection_locator.default.username%",
+            "password": "%atlas.pdo.connection_locator.default.password%"
+          },
+          "directory": "./src/DataSource",
+          "namespace": "App\\DataSource"
+        }
+      }
+    },
+    "transform": {
+      "types": {
+        //// add `table_name: Type` overrides here
+        // "foos": "Foo",
+        // "bars": "Bar",
+        // "bazzes": "Baz"
+      }
+    }
+  },
+  "twig": {
+    "paths": {
+      "Berlioz-AtlasPackage": "%berlioz.directories.vendor%/berlioz/atlas-package/resources"
     }
   }
 }

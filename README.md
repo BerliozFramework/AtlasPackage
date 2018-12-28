@@ -6,6 +6,9 @@ This package is intended to provide **Atlas** in **Berlioz Framework**.
 > 
 > [Official website of Atlas](http://atlasphp.io/)
 
+For more information, and use of Berlioz Framework, go to website and online documentation :
+https://getberlioz.com
+
 ## Installation
 
 ### Composer
@@ -15,21 +18,6 @@ You can install **Atlas Package** with [Composer](https://getcomposer.org/), it'
 ```bash
 $ composer require berlioz/atlas-package
 ```
-
-### Add package to Berlioz
-
-You can add the package to your configuration:
-- No `packages.json` file in your configuration?
-  > Create a `packages.json` if does not exists:
-  > ```json
-  > {
-  >     "packages": [
-  >         "\\Berlioz\\Package\\Atlas\\AtlasPackage"
-  >     ]
-  > }
-  > ```
-- `packages.json` file exists?
-  > Add this line: `\\Berlioz\\Package\\Atlas\\AtlasPackage` to your existing file, like examples.
 
 ### Dependencies
 
