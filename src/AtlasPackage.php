@@ -14,48 +14,82 @@ declare(strict_types=1);
 
 namespace Berlioz\Package\Atlas;
 
+use Atlas\Orm\Atlas;
 use Atlas\Orm\AtlasBuilder;
 use Atlas\Orm\Transaction\AutoCommit;
 use Atlas\Pdo\Connection;
 use Atlas\Pdo\ConnectionLocator;
+use Berlioz\Core\Core;
 use Berlioz\Core\Package\AbstractPackage;
+use Berlioz\ServiceContainer\Service;
 
 class AtlasPackage extends AbstractPackage
 {
-    /** @var \Atlas\Orm\AtlasBuilder Atlas builder */
-    private $atlasBuilder;
-    /** @var \Atlas\Orm\Atlas Atlas */
-    private $atlas;
+    /** @var \Berlioz\Package\Atlas\Debug\Atlas */
+    private static $debugSection;
 
     /**
-     * Init Atlas package.
-     *
+     * @inheritdoc
+     * @throws \Berlioz\Core\Exception\BerliozException
+     * @throws \Berlioz\ServiceContainer\Exception\ContainerException
+     */
+    public function register()
+    {
+        // Merge configuration
+        $this->mergeConfig(implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'resources', 'config.default.json']));
+
+        // Create router service
+        $atlasService = new Service(Atlas::class, 'atlas');
+        $atlasService->setFactory(AtlasPackage::class . '::atlasFactory');
+        $this->addService($atlasService);
+    }
+
+    /**
+     * @inheritdoc
      * @throws \Berlioz\Config\Exception\ConfigException
      * @throws \Berlioz\Core\Exception\BerliozException
      */
     public function init()
     {
-        // Register template path
-        $this->registerTemplatePath(implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'resources']), 'Berlioz-AtlasPackage');
+        if ($this->getCore()->getConfig()->get('berlioz.debug', false)) {
+            $this::$debugSection = new Debug\Atlas($this->getCore());
+            $this->getCore()->getDebug()->addSection($this::$debugSection);
+        }
+    }
 
+    /////////////////
+    /// FACTORIES ///
+    /////////////////
+
+    /**
+     * Init Atlas package.
+     *
+     * @param \Berlioz\Core\Core $core
+     *
+     * @return \Atlas\Orm\Atlas
+     * @throws \Berlioz\Config\Exception\ConfigException
+     * @throws \Berlioz\Core\Exception\BerliozException
+     */
+    public static function atlasFactory(Core $core): Atlas
+    {
         // Get configuration
-        $defaultPdoConfig = $this->getApp()->getConfig()->get('atlas.pdo.connection_locator.default', []);
-        $atlasBuilderArgs = $this->getPdoArgs($defaultPdoConfig);
+        $defaultPdoConfig = $core->getConfig()->get('atlas.pdo.connection_locator.default', []);
+        $atlasBuilderArgs = self::getPdoArgs($defaultPdoConfig);
 
         // Instance atlas builder with default configuration of PDO
-        $this->atlasBuilder = new AtlasBuilder(...$atlasBuilderArgs);
+        $atlasBuilder = new AtlasBuilder(...$atlasBuilderArgs);
 
         // Add additional connections
-        $connectionLocator = $this->atlasBuilder->getConnectionLocator();
-        $this->addConnections($connectionLocator, 'read');
-        $this->addConnections($connectionLocator, 'write');
+        $connectionLocator = $atlasBuilder->getConnectionLocator();
+        self::addConnections($core, $connectionLocator, 'read');
+        self::addConnections($core, $connectionLocator, 'write');
 
         // Transaction class
-        $transactionClass = (string) $this->getApp()->getConfig()->get('atlas.orm.atlas.transaction_class', AutoCommit::class);
-        $this->atlasBuilder->setTransactionClass($transactionClass);
+        $transactionClass = (string) $core->getConfig()->get('atlas.orm.atlas.transaction_class', AutoCommit::class);
+        $atlasBuilder->setTransactionClass($transactionClass);
 
         // Factory
-        $container = $this->getApp()->getServiceContainer();
+        $container = $core->getServiceContainer();
         $factory = function ($class) use ($container) {
             if ($container->has($class)) {
                 return $container->get($class);
@@ -63,46 +97,39 @@ class AtlasPackage extends AbstractPackage
 
             return new $class();
         };
-        $this->atlasBuilder->setFactory($factory);
+        $atlasBuilder->setFactory($factory);
 
-        // Create instance of atlas and add to the service container
-        $this->atlas = $this->atlasBuilder->newAtlas();
-        $this->getApp()->getServiceContainer()->register('atlas', $this->atlas);
+        // Create instance of atlas
+        $atlas = $atlasBuilder->newAtlas();
 
         // Log queries?
-        $this->atlas->logQueries($this->getApp()->getConfig()->get('atlas.orm.atlas.log_queries', false));
+        $atlas->logQueries($core->getConfig()->get('atlas.orm.atlas.log_queries', false));
 
         // Debug activate?
-        if ($this->getApp()->getConfig()->get('berlioz.debug', false)) {
-            $debugSection = new Debug\Atlas($this->getApp(), $this->atlas);
-            $this->getApp()->getDebug()->addSection($debugSection);
+        if ($core->getConfig()->get('berlioz.debug', false)) {
+            self::$debugSection->setAtlas($atlas);
         }
-    }
 
-    /**
-     * @inheritdoc
-     */
-    public function getDefaultConfigFilename(): ?string
-    {
-        return implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'resources', 'config.default.json']);
+        return $atlas;
     }
 
     /**
      * Add connections to connection locator.
      *
+     * @param \Berlioz\Core\Core           $core
      * @param \Atlas\Pdo\ConnectionLocator $connectionLocator
      * @param string                       $type
      *
      * @throws \Berlioz\Config\Exception\ConfigException
      * @throws \Berlioz\Core\Exception\BerliozException
      */
-    private function addConnections(ConnectionLocator $connectionLocator, string $type)
+    private static function addConnections(Core $core, ConnectionLocator $connectionLocator, string $type)
     {
-        $specs = $this->getApp()->getConfig()->get(sprintf('atlas.pdo.connection_locator.%s', $type), []);
+        $specs = $core->getConfig()->get(sprintf('atlas.pdo.connection_locator.%s', $type), []);
         $method = 'set' . ucfirst($type) . 'Factory';
 
         foreach ($specs as $name => $spec) {
-            $connectionArgs = $this->getPdoArgs($spec);
+            $connectionArgs = self::getPdoArgs($spec);
             $connectionLocator->$method($name, Connection::factory(...$connectionArgs));
         }
     }
@@ -114,7 +141,7 @@ class AtlasPackage extends AbstractPackage
      *
      * @return array
      */
-    private function getPdoArgs(array $spec)
+    private static function getPdoArgs(array $spec)
     {
         return [
             $spec['dsn'] ?? null,

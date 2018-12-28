@@ -14,17 +14,17 @@ declare(strict_types=1);
 
 namespace Berlioz\Package\Atlas\Debug;
 
-use Berlioz\Core\App\AbstractApp;
-use Berlioz\Core\App\AppAwareInterface;
-use Berlioz\Core\App\AppAwareTrait;
+use Berlioz\Core\Core;
+use Berlioz\Core\CoreAwareInterface;
+use Berlioz\Core\CoreAwareTrait;
 use Berlioz\Core\Debug\AbstractSection;
 use Berlioz\Core\Debug\Activity;
 use Berlioz\Core\Debug\Section;
 
-class Atlas extends AbstractSection implements Section, \Countable, AppAwareInterface
+class Atlas extends AbstractSection implements Section, \Countable, CoreAwareInterface
 {
-    use AppAwareTrait;
-    /** @var \Atlas\Orm\Atlas Atlas ORM */
+    use CoreAwareTrait;
+    /** @var \Atlas\Orm\Atlas|null Atlas ORM */
     private $atlas;
     /** @var array Queries */
     private $queries;
@@ -32,13 +32,25 @@ class Atlas extends AbstractSection implements Section, \Countable, AppAwareInte
     /**
      * Atlas constructor.
      *
-     * @param \Berlioz\Core\App\AbstractApp $app
-     * @param \Atlas\Orm\Atlas              $atlas
+     * @param \Berlioz\Core\Core $core
      */
-    public function __construct(AbstractApp $app, \Atlas\Orm\Atlas $atlas)
+    public function __construct(Core $core)
     {
-        $this->setApp($app);
+        $this->setCore($core);
+    }
+
+    /**
+     * Set atlas.
+     *
+     * @param \Atlas\Orm\Atlas $atlas
+     *
+     * @return \Berlioz\Package\Atlas\Debug\Atlas
+     */
+    public function setAtlas(\Atlas\Orm\Atlas $atlas): Atlas
+    {
         $this->atlas = $atlas;
+
+        return $this;
     }
 
     /////////////////////////
@@ -55,20 +67,24 @@ class Atlas extends AbstractSection implements Section, \Countable, AppAwareInte
 
     /**
      * @inheritdoc
+     * @throws \Berlioz\Core\Exception\BerliozException
      */
     public function saveReport()
     {
-        $debug = $this->getApp()->getDebug();
-        $this->queries = $this->atlas->getQueries();
+        $debug = $this->getCore()->getDebug();
 
-        // Add queries to the timeline
-        foreach ($this->queries as $query) {
-            $activity =
-                (new Activity('Query', $this->getSectionName()))
-                    ->start($query['start'])
-                    ->end($query['finish'])
-                    ->setDetail($query['statement']);
-            $debug->getTimeLine()->addActivity($activity);
+        if (!is_null($this->atlas)) {
+            $this->queries = $this->atlas->getQueries();
+
+            // Add queries to the timeline
+            foreach ($this->queries as $query) {
+                $activity =
+                    (new Activity('Query', $this->getSectionName()))
+                        ->start($query['start'])
+                        ->end($query['finish'])
+                        ->setDetail($query['statement']);
+                $debug->getTimeLine()->addActivity($activity);
+            }
         }
     }
 
