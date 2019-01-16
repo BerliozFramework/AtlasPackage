@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8070150821c938228d678c1f7b4e52eb",
+    "content-hash": "90a5afd99e51e25eea64317c202de1f6",
     "packages": [
         {
             "name": "atlas/cli",
@@ -372,7 +372,7 @@
         },
         {
             "name": "atlas/transit",
-            "version": "0.x-dev",
+            "version": "0.2.0-alpha",
             "source": {
                 "type": "git",
                 "url": "https://github.com/atlasphp/Atlas.Transit.git",
@@ -425,12 +425,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/BerliozFramework/CliCore.git",
-                "reference": "35fb18d1e64b071b8856f6e7086c3d960e856494"
+                "reference": "f34643db3c9dcc02195299975c8caaf1674ed86c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/BerliozFramework/CliCore/zipball/35fb18d1e64b071b8856f6e7086c3d960e856494",
-                "reference": "35fb18d1e64b071b8856f6e7086c3d960e856494",
+                "url": "https://api.github.com/repos/BerliozFramework/CliCore/zipball/f34643db3c9dcc02195299975c8caaf1674ed86c",
+                "reference": "f34643db3c9dcc02195299975c8caaf1674ed86c",
                 "shasum": ""
             },
             "require": {
@@ -468,7 +468,7 @@
             ],
             "description": "Berlioz Framework CLI Core",
             "homepage": "http://getberlioz.com",
-            "time": "2018-12-28T16:19:39+00:00"
+            "time": "2019-01-02T15:51:13+00:00"
         },
         {
             "name": "berlioz/config",
@@ -518,12 +518,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/BerliozFramework/Core.git",
-                "reference": "517085c1349fdee935f4286ac85bc1ef2abc82f9"
+                "reference": "e95d5ab06474b36c3dd76d8dee3f02f04c4f397b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/BerliozFramework/Core/zipball/517085c1349fdee935f4286ac85bc1ef2abc82f9",
-                "reference": "517085c1349fdee935f4286ac85bc1ef2abc82f9",
+                "url": "https://api.github.com/repos/BerliozFramework/Core/zipball/e95d5ab06474b36c3dd76d8dee3f02f04c4f397b",
+                "reference": "e95d5ab06474b36c3dd76d8dee3f02f04c4f397b",
                 "shasum": ""
             },
             "require": {
@@ -564,7 +564,7 @@
             ],
             "description": "Berlioz Framework Core",
             "homepage": "http://getberlioz.com",
-            "time": "2018-12-28T16:16:50+00:00"
+            "time": "2019-01-02T16:07:22+00:00"
         },
         {
             "name": "berlioz/service-container",
@@ -572,12 +572,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/BerliozFramework/ServiceContainer.git",
-                "reference": "8db51868f3814a19fd6820efc8d9eb825aa3c3e2"
+                "reference": "84a751fe98dc5ec300f789952f7ac08a88cfc282"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/BerliozFramework/ServiceContainer/zipball/8db51868f3814a19fd6820efc8d9eb825aa3c3e2",
-                "reference": "8db51868f3814a19fd6820efc8d9eb825aa3c3e2",
+                "url": "https://api.github.com/repos/BerliozFramework/ServiceContainer/zipball/84a751fe98dc5ec300f789952f7ac08a88cfc282",
+                "reference": "84a751fe98dc5ec300f789952f7ac08a88cfc282",
                 "shasum": ""
             },
             "require": {
@@ -609,7 +609,7 @@
             ],
             "description": "Berlioz Service Container",
             "homepage": "http://getberlioz.com",
-            "time": "2018-12-28T16:09:08+00:00"
+            "time": "2018-12-28T17:33:07+00:00"
         },
         {
             "name": "berlioz/utils",
@@ -1480,16 +1480,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "7.5.1",
+            "version": "7.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "c23d78776ad415d5506e0679723cb461d71f488f"
+                "reference": "7c89093bd00f7d5ddf0ab81dee04f801416b4944"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/c23d78776ad415d5506e0679723cb461d71f488f",
-                "reference": "c23d78776ad415d5506e0679723cb461d71f488f",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/7c89093bd00f7d5ddf0ab81dee04f801416b4944",
+                "reference": "7c89093bd00f7d5ddf0ab81dee04f801416b4944",
                 "shasum": ""
             },
             "require": {
@@ -1560,7 +1560,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2018-12-12T07:20:32+00:00"
+            "time": "2019-01-15T08:19:08+00:00"
         },
         {
             "name": "sebastian/code-unit-reverse-lookup",
@@ -2278,8 +2278,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "berlioz/cli-core": 20,
-        "atlas/transit": 20
+        "berlioz/cli-core": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
