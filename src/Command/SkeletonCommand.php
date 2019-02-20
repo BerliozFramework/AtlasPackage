@@ -18,11 +18,11 @@ use Atlas\Cli\Config;
 use Atlas\Cli\Fsio;
 use Atlas\Cli\Logger;
 use Atlas\Cli\Skeleton;
-use Berlioz\CliCore\App\CliArgs;
 use Berlioz\CliCore\Command\AbstractCommand;
 use Berlioz\Core\App\AppAwareInterface;
 use Berlioz\Core\App\AppAwareTrait;
 use Berlioz\Core\Core;
+use GetOpt\GetOpt;
 
 class SkeletonCommand extends AbstractCommand implements AppAwareInterface
 {
@@ -50,13 +50,17 @@ class SkeletonCommand extends AbstractCommand implements AppAwareInterface
     }
 
     /**
-     * Run command.
-     *
-     * @param \Berlioz\CliCore\App\CliArgs $args
-     *
-     * @return void
+     * @inheritdoc
      */
-    public function run(CliArgs $args)
+    public static function getShortDescription(): ?string
+    {
+        return 'Atlas ORM skeleton generation';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function run(GetOpt $getOpt)
     {
         print ($this->skeleton)();
     }

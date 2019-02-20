@@ -27,7 +27,7 @@
     "berlioz/cli-core": "dev-develop",
     "atlas/orm": "^3.1",
     "atlas/cli": "^2.2",
-    "atlas/transit": "0.2.0-alpha"
+    "atlas/transit": "0.x-dev"
   },
   "require-dev": {
     "phpunit/phpunit": "^7.5",
