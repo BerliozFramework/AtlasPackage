@@ -19,6 +19,7 @@ use Atlas\Orm\AtlasBuilder;
 use Atlas\Orm\Transaction\AutoCommit;
 use Atlas\Pdo\Connection;
 use Atlas\Pdo\ConnectionLocator;
+use Berlioz\Config\ExtendedJsonConfig;
 use Berlioz\Core\Core;
 use Berlioz\Core\Package\AbstractPackage;
 use Berlioz\ServiceContainer\Service;
@@ -27,21 +28,30 @@ class AtlasPackage extends AbstractPackage
 {
     /** @var \Berlioz\Package\Atlas\Debug\Atlas */
     private static $debugSection;
+    ///////////////
+    /// PACKAGE ///
+    ///////////////
+
+    /**
+     * @inheritdoc
+     * @throws \Berlioz\Config\Exception\ConfigException
+     */
+    public static function config()
+    {
+        return new ExtendedJsonConfig(implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'resources', 'config.default.json']), true);
+    }
 
     /**
      * @inheritdoc
      * @throws \Berlioz\Core\Exception\BerliozException
      * @throws \Berlioz\ServiceContainer\Exception\ContainerException
      */
-    public function register()
+    public static function register(Core $core): void
     {
-        // Merge configuration
-        $this->mergeConfig(implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'resources', 'config.default.json']));
-
         // Create router service
         $atlasService = new Service(Atlas::class, 'atlas');
         $atlasService->setFactory(AtlasPackage::class . '::atlasFactory');
-        $this->addService($atlasService);
+        self::addService($core, $atlasService);
     }
 
     /**
@@ -49,7 +59,7 @@ class AtlasPackage extends AbstractPackage
      * @throws \Berlioz\Config\Exception\ConfigException
      * @throws \Berlioz\Core\Exception\BerliozException
      */
-    public function init()
+    public function init(): void
     {
         if ($this->getCore()->getConfig()->get('berlioz.debug', false)) {
             $this::$debugSection = new Debug\Atlas($this->getCore());
@@ -121,7 +131,6 @@ class AtlasPackage extends AbstractPackage
      * @param string                       $type
      *
      * @throws \Berlioz\Config\Exception\ConfigException
-     * @throws \Berlioz\Core\Exception\BerliozException
      */
     private static function addConnections(Core $core, ConnectionLocator $connectionLocator, string $type)
     {
