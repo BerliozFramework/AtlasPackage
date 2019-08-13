@@ -14,11 +14,13 @@ declare(strict_types=1);
 
 namespace Berlioz\Package\Atlas;
 
+use Atlas\Mapper\MapperLocator;
+use Atlas\Mapper\MapperQueryFactory;
 use Atlas\Orm\Atlas;
-use Atlas\Orm\AtlasBuilder;
 use Atlas\Orm\Transaction\AutoCommit;
 use Atlas\Pdo\Connection;
 use Atlas\Pdo\ConnectionLocator;
+use Atlas\Table\TableLocator;
 use Berlioz\Config\ExtendedJsonConfig;
 use Berlioz\Core\Core;
 use Berlioz\Core\Package\AbstractPackage;
@@ -38,7 +40,16 @@ class AtlasPackage extends AbstractPackage
      */
     public static function config()
     {
-        return new ExtendedJsonConfig(implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'resources', 'config.default.json']), true);
+        return new ExtendedJsonConfig(
+            implode(
+                DIRECTORY_SEPARATOR, [
+                __DIR__,
+                '..',
+                'resources',
+                'config.default.json',
+            ]
+            ), true
+        );
     }
 
     /**
@@ -48,10 +59,20 @@ class AtlasPackage extends AbstractPackage
      */
     public static function register(Core $core): void
     {
-        // Create router service
+        // Create connection locator service
+        $connectionLocatorService = new Service(ConnectionLocator::class);
+        $connectionLocatorService->setFactory(AtlasPackage::class . '::connectionLocatorFactory');
+        self::addService($core, $connectionLocatorService);
+
+        // Create atlas service
         $atlasService = new Service(Atlas::class, 'atlas');
         $atlasService->setFactory(AtlasPackage::class . '::atlasFactory');
         self::addService($core, $atlasService);
+
+        // Create entity manager service
+        $entityManagerService = new Service(EntityManager::class, 'entityManager');
+        $entityManagerService->setFactory(AtlasPackage::class . '::transitFactory');
+        self::addService($core, $entityManagerService);
     }
 
     /**
@@ -72,6 +93,30 @@ class AtlasPackage extends AbstractPackage
     /////////////////
 
     /**
+     * ConnectionLocator factory.
+     *
+     * @param \Berlioz\Core\Core $core
+     *
+     * @return \Atlas\Pdo\ConnectionLocator
+     * @throws \Berlioz\Config\Exception\ConfigException
+     */
+    public static function connectionLocatorFactory(Core $core): ConnectionLocator
+    {
+        // Get configuration
+        $defaultPdoConfig = $core->getConfig()->get('atlas.pdo.connection_locator.default', []);
+        $pdoArgs = self::getPdoArgs($defaultPdoConfig);
+
+        // Create connection locator
+        $connectionLocator = ConnectionLocator::new(...$pdoArgs);
+
+        // Add additional connections
+        self::addConnections($core, $connectionLocator, 'read');
+        self::addConnections($core, $connectionLocator, 'write');
+
+        return $connectionLocator;
+    }
+
+    /**
      * Init Atlas package.
      *
      * @param \Berlioz\Core\Core $core
@@ -82,21 +127,7 @@ class AtlasPackage extends AbstractPackage
      */
     public static function atlasFactory(Core $core): Atlas
     {
-        // Get configuration
-        $defaultPdoConfig = $core->getConfig()->get('atlas.pdo.connection_locator.default', []);
-        $atlasBuilderArgs = self::getPdoArgs($defaultPdoConfig);
-
-        // Instance atlas builder with default configuration of PDO
-        $atlasBuilder = new AtlasBuilder(...$atlasBuilderArgs);
-
-        // Add additional connections
-        $connectionLocator = $atlasBuilder->getConnectionLocator();
-        self::addConnections($core, $connectionLocator, 'read');
-        self::addConnections($core, $connectionLocator, 'write');
-
-        // Transaction class
-        $transactionClass = (string) $core->getConfig()->get('atlas.orm.atlas.transaction_class', AutoCommit::class);
-        $atlasBuilder->setTransactionClass($transactionClass);
+        $connectionLocator = $core->getServiceContainer()->get(ConnectionLocator::class);
 
         // Factory
         $container = $core->getServiceContainer();
@@ -107,10 +138,22 @@ class AtlasPackage extends AbstractPackage
 
             return new $class();
         };
-        $atlasBuilder->setFactory($factory);
 
-        // Create instance of atlas
-        $atlas = $atlasBuilder->newAtlas();
+        // Table locator
+        $tableLocator = new TableLocator(
+            $connectionLocator,
+            new MapperQueryFactory(),
+            $factory
+        );
+
+        // Transaction class
+        $transactionClass = (string)$core->getConfig()->get('atlas.orm.atlas.transaction_class', AutoCommit::class);
+
+        // Create Atlas object
+        $atlas = new Atlas(
+            new MapperLocator($tableLocator, $factory),
+            new $transactionClass($connectionLocator)
+        );
 
         // Log queries?
         $atlas->logQueries($core->getConfig()->get('atlas.orm.atlas.log_queries', false));
@@ -126,9 +169,9 @@ class AtlasPackage extends AbstractPackage
     /**
      * Add connections to connection locator.
      *
-     * @param \Berlioz\Core\Core           $core
+     * @param \Berlioz\Core\Core $core
      * @param \Atlas\Pdo\ConnectionLocator $connectionLocator
-     * @param string                       $type
+     * @param string $type
      *
      * @throws \Berlioz\Config\Exception\ConfigException
      */
@@ -158,5 +201,24 @@ class AtlasPackage extends AbstractPackage
             $spec['password'] ?? null,
             $spec['options'] ?? [],
         ];
+    }
+
+    /**
+     * Atlas Transit factory.
+     *
+     * @param \Berlioz\Core\Core $core
+     *
+     * @return \Berlioz\Package\Atlas\EntityManager
+     * @throws \Berlioz\Config\Exception\ConfigException
+     * @throws \Berlioz\Core\Exception\BerliozException
+     */
+    public static function transitFactory(Core $core)
+    {
+        /** @var \Atlas\Orm\Atlas $atlas */
+        $atlas = $core->getServiceContainer()->get(Atlas::class);
+        $transit = EntityManager::new($atlas, (string)$core->getConfig()->get('atlas.cli.config.input.namespace'));
+        $transit->setCore($core);
+
+        return $transit;
     }
 }
