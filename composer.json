@@ -22,6 +22,20 @@
       "Berlioz\\Package\\Atlas\\Tests\\": "tests/"
     }
   },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/ElGigi/Atlas.Orm.git"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/ElGigi/Atlas.Table.git"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/ElGigi/Atlas.Transit.git"
+    }
+  ],
   "require": {
     "php": "^7.2",
     "berlioz/cli-core": "dev-develop",
