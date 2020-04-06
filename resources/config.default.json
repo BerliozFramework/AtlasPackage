@@ -19,7 +19,7 @@
     "orm": {
       "atlas": {
         "transaction_class": "Atlas\\Orm\\Transaction\\AutoTransact",
-        "log_queries": "%berlioz.debug%"
+        "log_queries": "%berlioz.debug.enable%"
       }
     },
     "cli": {
