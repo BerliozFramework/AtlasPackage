@@ -156,7 +156,12 @@ class AtlasPackage extends AbstractPackage
         );
 
         // Log queries?
-        $atlas->logQueries($core->getConfig()->get('atlas.orm.atlas.log_queries', false));
+        $logQueries = $core->getConfig()->get('atlas.orm.atlas.log_queries', false);
+        if (null === filter_var($logQueries, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)) {
+            throw new ConfigException("'atlas.orm.atlas.log_queries' must be a boolean");
+        }
+
+        $atlas->logQueries((bool)$logQueries);
 
         // Debug activate?
         if ($core->getConfig()->get('berlioz.debug', false)) {
