@@ -164,7 +164,7 @@ class AtlasPackage extends AbstractPackage
         $atlas->logQueries((bool)$logQueries);
 
         // Debug activate?
-        if ($core->getConfig()->get('berlioz.debug', false)) {
+        if ($core->getConfig()->get('berlioz.debug.enable', false)) {
             self::$debugSection->setAtlas($atlas);
         }
 
