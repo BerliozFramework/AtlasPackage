@@ -24,6 +24,7 @@ use Berlioz\Core\Debug\Section;
 class Atlas extends AbstractSection implements Section, \Countable, CoreAwareInterface
 {
     use CoreAwareTrait;
+
     /** @var \Atlas\Orm\Atlas|null Atlas ORM */
     private $atlas;
     /** @var array Queries */
@@ -157,11 +158,17 @@ class Atlas extends AbstractSection implements Section, \Countable, CoreAwareInt
      */
     public function getDuration(): float
     {
+        if (empty($this->queries)) {
+            return 0;
+        }
+
         $duration =
-            array_reduce($this->queries,
+            array_reduce(
+                $this->queries,
                 function ($time, $query) {
                     return $time + $query['duration'];
-                });
+                }
+            );
 
         return floatval($duration);
     }
