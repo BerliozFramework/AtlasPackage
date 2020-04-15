@@ -44,8 +44,7 @@
     "atlas/transit": "0.x-dev"
   },
   "require-dev": {
-    "phpunit/phpunit": "^7.5",
-    "atlas/cli": "^2.0"
+    "phpunit/phpunit": "^7.5"
   },
   "config": {
     "berlioz": {
