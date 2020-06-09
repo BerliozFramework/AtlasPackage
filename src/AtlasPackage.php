@@ -84,9 +84,9 @@ class AtlasPackage extends AbstractPackage
      * @throws ConfigException
      * @throws BerliozException
      */
-    public function init(): void
+    public function init(Core $core = null): void
     {
-        if ($this->getCore()->getConfig()->get('berlioz.debug', false)) {
+        if (null !== $core && $core->getConfig()->get('berlioz.debug', false)) {
             $this::$debugSection = new Debug\Atlas($this->getCore());
             $this->getCore()->getDebug()->addSection($this::$debugSection);
         }
@@ -218,7 +218,6 @@ class AtlasPackage extends AbstractPackage
      *
      * @return EntityManager
      * @throws ConfigException
-     * @throws BerliozException
      */
     public static function transitFactory(Core $core)
     {
