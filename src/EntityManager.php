@@ -14,12 +14,10 @@ declare(strict_types=1);
 
 namespace Berlioz\Package\Atlas;
 
+use Atlas\Mapper\Record;
 use Atlas\Orm\Atlas;
 use Atlas\Transit\Handler\HandlerLocator;
-use Atlas\Transit\Inflector\CamelCase;
-use Atlas\Transit\Inflector\SnakeCase;
 use Atlas\Transit\Transit;
-use Berlioz\Core\Core;
 use Berlioz\Core\CoreAwareInterface;
 use Berlioz\Core\CoreAwareTrait;
 use Berlioz\Package\Atlas\Exception\RepositoryException;
@@ -38,8 +36,8 @@ class EntityManager extends Transit implements CoreAwareInterface
     /**
      * EntityManager constructor.
      *
-     * @param \Atlas\Orm\Atlas $atlas
-     * @param \Atlas\Transit\Handler\HandlerLocator $handlerLocator
+     * @param Atlas $atlas
+     * @param HandlerLocator $handlerLocator
      */
     public function __construct(Atlas $atlas, HandlerLocator $handlerLocator)
     {
@@ -57,7 +55,8 @@ class EntityManager extends Transit implements CoreAwareInterface
     public function attach(object $domain): EntityManager
     {
         $handler = $this->handlerLocator->get($domain);
-        /** @var \Atlas\Mapper\Record $record */
+
+        /** @var Record $record */
         $record = $handler->updateSource($domain, $this->plan);
         $record->getRow()->init('');
 
@@ -69,8 +68,8 @@ class EntityManager extends Transit implements CoreAwareInterface
      *
      * @param string $class
      *
-     * @return \Berlioz\Package\Atlas\Repository\RepositoryInterface
-     * @throws \Berlioz\Package\Atlas\Exception\RepositoryException
+     * @return RepositoryInterface
+     * @throws RepositoryException
      */
     public function getRepository(string $class): RepositoryInterface
     {

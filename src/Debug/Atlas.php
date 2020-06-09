@@ -20,8 +20,10 @@ use Berlioz\Core\CoreAwareTrait;
 use Berlioz\Core\Debug\AbstractSection;
 use Berlioz\Core\Debug\Activity;
 use Berlioz\Core\Debug\Section;
+use Berlioz\Core\Exception\BerliozException;
+use Countable;
 
-class Atlas extends AbstractSection implements Section, \Countable, CoreAwareInterface
+class Atlas extends AbstractSection implements Section, Countable, CoreAwareInterface
 {
     use CoreAwareTrait;
 
@@ -33,7 +35,7 @@ class Atlas extends AbstractSection implements Section, \Countable, CoreAwareInt
     /**
      * Atlas constructor.
      *
-     * @param \Berlioz\Core\Core $core
+     * @param Core $core
      */
     public function __construct(Core $core)
     {
@@ -45,7 +47,7 @@ class Atlas extends AbstractSection implements Section, \Countable, CoreAwareInt
      *
      * @param \Atlas\Orm\Atlas $atlas
      *
-     * @return \Berlioz\Package\Atlas\Debug\Atlas
+     * @return Atlas
      */
     public function setAtlas(\Atlas\Orm\Atlas $atlas): Atlas
     {
@@ -68,7 +70,7 @@ class Atlas extends AbstractSection implements Section, \Countable, CoreAwareInt
 
     /**
      * @inheritdoc
-     * @throws \Berlioz\Core\Exception\BerliozException
+     * @throws BerliozException
      */
     public function saveReport()
     {

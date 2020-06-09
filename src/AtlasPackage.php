@@ -21,41 +21,45 @@ use Atlas\Orm\Transaction\AutoCommit;
 use Atlas\Pdo\Connection;
 use Atlas\Pdo\ConnectionLocator;
 use Atlas\Table\TableLocator;
+use Berlioz\Config\Exception\ConfigException;
 use Berlioz\Config\ExtendedJsonConfig;
 use Berlioz\Core\Core;
+use Berlioz\Core\Exception\BerliozException;
 use Berlioz\Core\Package\AbstractPackage;
+use Berlioz\ServiceContainer\Exception\ContainerException;
 use Berlioz\ServiceContainer\Service;
 
 class AtlasPackage extends AbstractPackage
 {
-    /** @var \Berlioz\Package\Atlas\Debug\Atlas */
+    /** @var Debug\Atlas */
     private static $debugSection;
+
     ///////////////
     /// PACKAGE ///
     ///////////////
 
     /**
      * @inheritdoc
-     * @throws \Berlioz\Config\Exception\ConfigException
+     * @throws ConfigException
      */
     public static function config()
     {
         return new ExtendedJsonConfig(
             implode(
-                DIRECTORY_SEPARATOR, [
-                __DIR__,
-                '..',
-                'resources',
-                'config.default.json',
-            ]
+                DIRECTORY_SEPARATOR,
+                [
+                    __DIR__,
+                    '..',
+                    'resources',
+                    'config.default.json',
+                ]
             ), true
         );
     }
 
     /**
      * @inheritdoc
-     * @throws \Berlioz\Core\Exception\BerliozException
-     * @throws \Berlioz\ServiceContainer\Exception\ContainerException
+     * @throws ContainerException
      */
     public static function register(Core $core): void
     {
@@ -77,8 +81,8 @@ class AtlasPackage extends AbstractPackage
 
     /**
      * @inheritdoc
-     * @throws \Berlioz\Config\Exception\ConfigException
-     * @throws \Berlioz\Core\Exception\BerliozException
+     * @throws ConfigException
+     * @throws BerliozException
      */
     public function init(): void
     {
@@ -95,10 +99,10 @@ class AtlasPackage extends AbstractPackage
     /**
      * ConnectionLocator factory.
      *
-     * @param \Berlioz\Core\Core $core
+     * @param Core $core
      *
-     * @return \Atlas\Pdo\ConnectionLocator
-     * @throws \Berlioz\Config\Exception\ConfigException
+     * @return ConnectionLocator
+     * @throws ConfigException
      */
     public static function connectionLocatorFactory(Core $core): ConnectionLocator
     {
@@ -119,11 +123,10 @@ class AtlasPackage extends AbstractPackage
     /**
      * Init Atlas package.
      *
-     * @param \Berlioz\Core\Core $core
+     * @param Core $core
      *
-     * @return \Atlas\Orm\Atlas
-     * @throws \Berlioz\Config\Exception\ConfigException
-     * @throws \Berlioz\Core\Exception\BerliozException
+     * @return Atlas
+     * @throws ConfigException
      */
     public static function atlasFactory(Core $core): Atlas
     {
@@ -174,11 +177,11 @@ class AtlasPackage extends AbstractPackage
     /**
      * Add connections to connection locator.
      *
-     * @param \Berlioz\Core\Core $core
-     * @param \Atlas\Pdo\ConnectionLocator $connectionLocator
+     * @param Core $core
+     * @param ConnectionLocator $connectionLocator
      * @param string $type
      *
-     * @throws \Berlioz\Config\Exception\ConfigException
+     * @throws ConfigException
      */
     private static function addConnections(Core $core, ConnectionLocator $connectionLocator, string $type)
     {
@@ -211,15 +214,15 @@ class AtlasPackage extends AbstractPackage
     /**
      * Atlas Transit factory.
      *
-     * @param \Berlioz\Core\Core $core
+     * @param Core $core
      *
-     * @return \Berlioz\Package\Atlas\EntityManager
-     * @throws \Berlioz\Config\Exception\ConfigException
-     * @throws \Berlioz\Core\Exception\BerliozException
+     * @return EntityManager
+     * @throws ConfigException
+     * @throws BerliozException
      */
     public static function transitFactory(Core $core)
     {
-        /** @var \Atlas\Orm\Atlas $atlas */
+        /** @var Atlas $atlas */
         $atlas = $core->getServiceContainer()->get(Atlas::class);
         $transit = EntityManager::new($atlas, (string)$core->getConfig()->get('atlas.cli.config.input.namespace'));
         $transit->setCore($core);

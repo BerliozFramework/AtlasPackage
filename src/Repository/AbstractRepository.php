@@ -34,8 +34,8 @@ abstract class AbstractRepository implements EntityManagerAwareInterface, CoreAw
     /**
      * AbstractRepository constructor.
      *
-     * @param \Berlioz\Core\Core $core
-     * @param \Berlioz\Package\Atlas\EntityManager $entityManager
+     * @param Core $core
+     * @param EntityManager $entityManager
      */
     public function __construct(Core $core, EntityManager $entityManager)
     {

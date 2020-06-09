@@ -24,14 +24,14 @@ interface EntityManagerAwareInterface
     /**
      * Get entity manager.
      *
-     * @return \Berlioz\Package\Atlas\EntityManager|null
+     * @return EntityManager|null
      */
     public function getEntityManager(): ?EntityManager;
 
     /**
      * Set entity manager.
      *
-     * @param \Berlioz\Package\Atlas\EntityManager $entityManager
+     * @param EntityManager $entityManager
      *
      *
      * @return static

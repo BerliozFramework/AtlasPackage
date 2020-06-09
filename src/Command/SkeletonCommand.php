@@ -15,38 +15,44 @@ declare(strict_types=1);
 namespace Berlioz\Package\Atlas\Command;
 
 use Atlas\Cli\Config;
+use Atlas\Cli\Exception;
 use Atlas\Cli\Fsio;
 use Atlas\Cli\Logger;
 use Atlas\Cli\Skeleton;
 use Berlioz\CliCore\Command\AbstractCommand;
+use Berlioz\Config\Exception\ConfigException;
 use Berlioz\Core\App\AppAwareInterface;
 use Berlioz\Core\App\AppAwareTrait;
 use Berlioz\Core\Core;
+use Berlioz\Core\Exception\BerliozException;
 use GetOpt\GetOpt;
 
 class SkeletonCommand extends AbstractCommand implements AppAwareInterface
 {
     use AppAwareTrait;
-    /** @var \Atlas\Cli\Skeleton Skeleton */
+
+    /** @var Skeleton Skeleton */
     private $skeleton;
 
     /**
      * SkeletonCommand constructor.
      *
-     * @param \Berlioz\Core\Core $core
+     * @param Core $core
      *
-     * @throws \Atlas\Cli\Exception
-     * @throws \Berlioz\Config\Exception\ConfigException
-     * @throws \Berlioz\Core\Exception\BerliozException
+     * @throws Exception
+     * @throws ConfigException
+     * @throws BerliozException
      */
     public function __construct(Core $core)
     {
         $config = $core->getConfig()->get('atlas.cli.config.input');
         $config['pdo'] = array_values($config['pdo']);
 
-        $this->skeleton = new Skeleton(new Config($config),
-                                       new Fsio(),
-                                       new Logger());
+        $this->skeleton = new Skeleton(
+            new Config($config),
+            new Fsio(),
+            new Logger()
+        );
     }
 
     /**
