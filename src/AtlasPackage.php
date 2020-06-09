@@ -87,8 +87,8 @@ class AtlasPackage extends AbstractPackage
     public function init(Core $core = null): void
     {
         if (null !== $core && $core->getConfig()->get('berlioz.debug', false)) {
-            $this::$debugSection = new Debug\Atlas($this->getCore());
-            $this->getCore()->getDebug()->addSection($this::$debugSection);
+            $this::$debugSection = new Debug\Atlas($core);
+            $core->getDebug()->addSection($this::$debugSection);
         }
     }
 
