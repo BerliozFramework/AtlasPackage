@@ -66,8 +66,10 @@ class SkeletonCommand extends AbstractCommand implements AppAwareInterface
     /**
      * @inheritdoc
      */
-    public function run(GetOpt $getOpt)
+    public function run(GetOpt $getOpt): int
     {
         print ($this->skeleton)();
+
+        return 0;
     }
 }
