@@ -19,57 +19,50 @@ use Atlas\Cli\Exception;
 use Atlas\Cli\Fsio;
 use Atlas\Cli\Logger;
 use Atlas\Cli\Skeleton;
-use Berlioz\CliCore\Command\AbstractCommand;
+use Berlioz\Cli\Core\Command\AbstractCommand;
+use Berlioz\Cli\Core\Console\Environment;
 use Berlioz\Config\Exception\ConfigException;
-use Berlioz\Core\App\AppAwareInterface;
-use Berlioz\Core\App\AppAwareTrait;
-use Berlioz\Core\Core;
-use Berlioz\Core\Exception\BerliozException;
-use GetOpt\GetOpt;
 
-class SkeletonCommand extends AbstractCommand implements AppAwareInterface
+class SkeletonCommand extends AbstractCommand
 {
-    use AppAwareTrait;
-
-    /** @var Skeleton Skeleton */
-    private $skeleton;
-
-    /**
-     * SkeletonCommand constructor.
-     *
-     * @param Core $core
-     *
-     * @throws Exception
-     * @throws ConfigException
-     * @throws BerliozException
-     */
-    public function __construct(Core $core)
-    {
-        $config = $core->getConfig()->get('atlas.cli.config.input');
-        $config['pdo'] = array_values($config['pdo']);
-
-        $this->skeleton = new Skeleton(
-            new Config($config),
-            new Fsio(),
-            new Logger()
-        );
-    }
-
     /**
      * @inheritdoc
      */
-    public static function getShortDescription(): ?string
+    public static function getDescription(): ?string
     {
         return 'Atlas ORM skeleton generation';
     }
 
     /**
      * @inheritdoc
+     * @throws Exception
+     * @throws ConfigException
      */
-    public function run(GetOpt $getOpt): int
+    public function run(Environment $env): int
     {
-        print ($this->skeleton)();
+        $config = $this->getApp()->getConfig()->get('atlas.cli.config.input');
+        $config['pdo'] = array_values($config['pdo']);
+
+        $this->generateSkeleton($config);
 
         return 0;
+    }
+
+    /**
+     * Generate ATLAS skeleton.
+     *
+     * @param array $config
+     *
+     * @throws Exception
+     */
+    public function generateSkeleton(array $config): void
+    {
+        $skeleton = new Skeleton(
+            new Config($config),
+            new Fsio(),
+            new Logger()
+        );
+
+        print ($skeleton)();
     }
 }

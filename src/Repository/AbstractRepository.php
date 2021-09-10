@@ -14,32 +14,13 @@ declare(strict_types=1);
 
 namespace Berlioz\Package\Atlas\Repository;
 
-use Berlioz\Core\Core;
 use Berlioz\Core\CoreAwareInterface;
 use Berlioz\Core\CoreAwareTrait;
-use Berlioz\Package\Atlas\EntityManager;
 use Berlioz\Package\Atlas\EntityManagerAwareInterface;
 use Berlioz\Package\Atlas\EntityManagerAwareTrait;
 
-/**
- * Class AbstractRepository.
- *
- * @package Berlioz\Package\Atlas\Repository
- */
 abstract class AbstractRepository implements EntityManagerAwareInterface, CoreAwareInterface, RepositoryInterface
 {
     use CoreAwareTrait;
     use EntityManagerAwareTrait;
-
-    /**
-     * AbstractRepository constructor.
-     *
-     * @param Core $core
-     * @param EntityManager $entityManager
-     */
-    public function __construct(Core $core, EntityManager $entityManager)
-    {
-        $this->setCore($core);
-        $this->setEntityManager($entityManager);
-    }
 }

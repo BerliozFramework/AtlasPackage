@@ -1,8 +1,9 @@
 # Atlas ORM package for Berlioz Framework
 
 [![Latest Version](https://img.shields.io/packagist/v/berlioz/atlas-package.svg?style=flat-square)](https://github.com/BerliozFramework/AtlasPackage/releases)
-[![Software license](https://img.shields.io/github/license/BerliozFramework/AtlasPackage.svg?style=flat-square)](https://github.com/BerliozFramework/AtlasPackage/blob/1.x/LICENSE)
-[![Quality Grade](https://img.shields.io/codacy/grade/35cc79cf05c8460793c569e5b2fe1bbe/1.x.svg?style=flat-square)](https://www.codacy.com/manual/BerliozFramework/AtlasPackage)
+[![Software license](https://img.shields.io/github/license/BerliozFramework/AtlasPackage.svg?style=flat-square)](https://github.com/BerliozFramework/AtlasPackage/blob/2.x/LICENSE)
+[![Build Status](https://img.shields.io/github/workflow/status/BerliozFramework/AtlasPackage/Tests/2.x.svg?style=flat-square)](https://github.com/BerliozFramework/AtlasPackage/actions/workflows/tests.yml?query=branch%3A2.x)
+[![Quality Grade](https://img.shields.io/codacy/grade/35cc79cf05c8460793c569e5b2fe1bbe/2.x.svg?style=flat-square)](https://www.codacy.com/manual/BerliozFramework/AtlasPackage)
 [![Total Downloads](https://img.shields.io/packagist/dt/berlioz/atlas-package.svg?style=flat-square)](https://packagist.org/packages/berlioz/atlas-package)
 
 This package is intended to provide **Atlas** in **Berlioz Framework**.

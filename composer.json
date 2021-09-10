@@ -37,18 +37,19 @@
     }
   ],
   "require": {
-    "php": "^7.2 || ^8.0",
-    "berlioz/cli-core": "^1.0",
+    "php": "^8.0",
+    "berlioz/cli-core": "^2.0",
     "atlas/orm": "^3.1",
     "atlas/cli": "^2.2",
-    "atlas/transit": "0.x-dev"
+    "atlas/transit": "0.x-dev",
+    "doctrine/sql-formatter": "^1.1"
   },
   "require-dev": {
-    "phpunit/phpunit": "^7.5 || ^8.0 || ^9.0"
+    "phpunit/phpunit": "^9.5"
   },
   "config": {
     "berlioz": {
-      "package": "Berlioz\\Package\\Atlas\\AtlasPackage"
+      "package": "Berlioz\\Package\\Atlas\\BerliozPackage"
     }
   }
 }

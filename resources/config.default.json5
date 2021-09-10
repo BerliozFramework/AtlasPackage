@@ -19,16 +19,16 @@
     "orm": {
       "atlas": {
         "transaction_class": "Atlas\\Orm\\Transaction\\AutoTransact",
-        "log_queries": "%berlioz.debug.enable%"
+        "log_queries": "{config: berlioz.debug.enable}"
       }
     },
     "cli": {
       "config": {
         "input": {
           "pdo": {
-            "dsn": "%atlas.pdo.connection_locator.default.dsn%",
-            "username": "%atlas.pdo.connection_locator.default.username%",
-            "password": "%atlas.pdo.connection_locator.default.password%"
+            "dsn": "{config: atlas.pdo.connection_locator.default.dsn}",
+            "username": "{config: atlas.pdo.connection_locator.default.username}",
+            "password": "{config: atlas.pdo.connection_locator.default.password}"
           },
           "directory": "./src/DataSource",
           "namespace": "App\\DataSource"
@@ -46,7 +46,7 @@
   },
   "twig": {
     "paths": {
-      "Berlioz-AtlasPackage": "%berlioz.directories.vendor%/berlioz/atlas-package/resources"
+      "Berlioz-AtlasPackage": "{config: berlioz.directories.vendor}/berlioz/atlas-package/resources"
     }
   }
 }

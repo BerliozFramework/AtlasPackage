@@ -18,20 +18,15 @@ use Atlas\Mapper\Record;
 use Atlas\Orm\Atlas;
 use Atlas\Transit\Handler\HandlerLocator;
 use Atlas\Transit\Transit;
-use Berlioz\Core\CoreAwareInterface;
-use Berlioz\Core\CoreAwareTrait;
 use Berlioz\Package\Atlas\Exception\RepositoryException;
 use Berlioz\Package\Atlas\Repository\RepositoryInterface;
+use Berlioz\ServiceContainer\ContainerAwareInterface;
+use Berlioz\ServiceContainer\ContainerAwareTrait;
 use Exception;
 
-/**
- * Class EntityManager.
- *
- * @package Berlioz\Package\Atlas
- */
-class EntityManager extends Transit implements CoreAwareInterface
+class EntityManager extends Transit implements ContainerAwareInterface
 {
-    use CoreAwareTrait;
+    use ContainerAwareTrait;
 
     /**
      * EntityManager constructor.
@@ -39,8 +34,10 @@ class EntityManager extends Transit implements CoreAwareInterface
      * @param Atlas $atlas
      * @param HandlerLocator $handlerLocator
      */
-    public function __construct(Atlas $atlas, HandlerLocator $handlerLocator)
-    {
+    public function __construct(
+        Atlas $atlas,
+        HandlerLocator $handlerLocator,
+    ) {
         parent::__construct($atlas, $handlerLocator);
     }
 
@@ -74,8 +71,7 @@ class EntityManager extends Transit implements CoreAwareInterface
     public function getRepository(string $class): RepositoryInterface
     {
         try {
-            $instantiator = $this->getCore()->getServiceContainer()->getInstantiator();
-            $repository = $instantiator->newInstanceOf($class, ['entityManager' => $this, 'core' => $this->getCore()]);
+            $repository = $this->container->call($class, ['entityManager' => $this]);
 
             if (!$repository instanceof RepositoryInterface) {
                 throw new RepositoryException('Not a valid repository');
@@ -85,7 +81,7 @@ class EntityManager extends Transit implements CoreAwareInterface
         } catch (RepositoryException $e) {
             throw $e;
         } catch (Exception $e) {
-            throw new RepositoryException(sprintf('Unable to instance repository class "%s"', $class));
+            throw new RepositoryException(sprintf('Unable to instance repository class "%s"', $class), previous: $e);
         }
     }
 }

@@ -32,11 +32,8 @@ interface EntityManagerAwareInterface
      * Set entity manager.
      *
      * @param EntityManager $entityManager
-     *
-     *
-     * @return static
      */
-    public function setEntityManager(EntityManager $entityManager);
+    public function setEntityManager(EntityManager $entityManager): void;
 
     /**
      * Has entity manager?

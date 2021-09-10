@@ -1,18 +1,8 @@
 <?php
-/**
- * This file is part of Berlioz framework.
- *
- * @license   https://opensource.org/licenses/MIT MIT License
- * @copyright 2018 Ronan GIRON
- * @author    Ronan GIRON <https://github.com/ElGigi>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code, to the root.
- */
 
 declare(strict_types=1);
 
-namespace Berlioz\Package\Atlas;
+namespace Berlioz\Package\Atlas\Container;
 
 use Atlas\Mapper\MapperLocator;
 use Atlas\Mapper\MapperQueryFactory;
@@ -21,75 +11,64 @@ use Atlas\Orm\Transaction\AutoCommit;
 use Atlas\Pdo\Connection;
 use Atlas\Pdo\ConnectionLocator;
 use Atlas\Table\TableLocator;
+use Berlioz\Config\Config;
 use Berlioz\Config\Exception\ConfigException;
-use Berlioz\Config\ExtendedJsonConfig;
 use Berlioz\Core\Core;
-use Berlioz\Core\Exception\BerliozException;
-use Berlioz\Core\Package\AbstractPackage;
-use Berlioz\ServiceContainer\Exception\ContainerException;
-use Berlioz\ServiceContainer\Service;
+use Berlioz\Package\Atlas\Debug\AtlasSection;
+use Berlioz\Package\Atlas\EntityManager;
+use Berlioz\Package\Atlas\EntityManagerAwareInterface;
+use Berlioz\ServiceContainer\Container;
+use Berlioz\ServiceContainer\Inflector\Inflector;
+use Berlioz\ServiceContainer\Provider\AbstractServiceProvider;
+use Berlioz\ServiceContainer\Service\Service;
 
-class AtlasPackage extends AbstractPackage
+class ServiceProvider extends AbstractServiceProvider
 {
-    /** @var Debug\Atlas */
-    private static $debugSection;
-
-    ///////////////
-    /// PACKAGE ///
-    ///////////////
-
-    /**
-     * @inheritdoc
-     * @throws ConfigException
-     */
-    public static function config()
-    {
-        return new ExtendedJsonConfig(
-            implode(
-                DIRECTORY_SEPARATOR,
-                [
-                    __DIR__,
-                    '..',
-                    'resources',
-                    'config.default.json',
-                ]
-            ), true
-        );
-    }
+    protected array $provides = [
+        ConnectionLocator::class,
+        Atlas::class,
+        EntityManager::class,
+        'atlas',
+        'entityManager',
+    ];
 
     /**
-     * @inheritdoc
-     * @throws ContainerException
+     * @inheritDoc
      */
-    public static function register(Core $core): void
+    public function register(Container $container): void
     {
         // Create connection locator service
-        $connectionLocatorService = new Service(ConnectionLocator::class);
-        $connectionLocatorService->setFactory(AtlasPackage::class . '::connectionLocatorFactory');
-        self::addService($core, $connectionLocatorService);
+        $connectionLocatorService = new Service(
+                     ConnectionLocator::class,
+            factory: static::class . '::connectionLocatorFactory'
+        );
+        $container->addService($connectionLocatorService);
 
         // Create atlas service
-        $atlasService = new Service(Atlas::class, 'atlas');
-        $atlasService->setFactory(AtlasPackage::class . '::atlasFactory');
-        self::addService($core, $atlasService);
+        $atlasService = new Service(Atlas::class, 'atlas', factory: static::class . '::atlasFactory');
+        $container->addService($atlasService);
 
         // Create entity manager service
-        $entityManagerService = new Service(EntityManager::class, 'entityManager');
-        $entityManagerService->setFactory(AtlasPackage::class . '::transitFactory');
-        self::addService($core, $entityManagerService);
+        $entityManagerService = new Service(
+            class:   EntityManager::class,
+            alias:   'entityManager',
+            factory: static::class . '::transitFactory'
+        );
+        $container->addService($entityManagerService);
     }
 
     /**
-     * @inheritdoc
-     * @throws ConfigException
-     * @throws BerliozException
+     * @inheritDoc
      */
-    public function init(Core $core = null): void
+    public function boot(Container $container): void
     {
-        if (null !== $core && $core->getConfig()->get('berlioz.debug', false)) {
-            $this::$debugSection = new Debug\Atlas($core);
-            $core->getDebug()->addSection($this::$debugSection);
-        }
+        $container->addInflector(
+            new Inflector(
+                EntityManagerAwareInterface::class,
+                'setEntityManager',
+                ['entityManager' => '@entityManager']
+            )
+        );
     }
 
     /////////////////
@@ -114,8 +93,8 @@ class AtlasPackage extends AbstractPackage
         $connectionLocator = ConnectionLocator::new(...$pdoArgs);
 
         // Add additional connections
-        self::addConnections($core, $connectionLocator, 'read');
-        self::addConnections($core, $connectionLocator, 'write');
+        self::addConnections($core->getConfig(), $connectionLocator, 'read');
+        self::addConnections($core->getConfig(), $connectionLocator, 'write');
 
         return $connectionLocator;
     }
@@ -130,10 +109,10 @@ class AtlasPackage extends AbstractPackage
      */
     public static function atlasFactory(Core $core): Atlas
     {
-        $connectionLocator = $core->getServiceContainer()->get(ConnectionLocator::class);
+        $container = $core->getContainer();
+        $connectionLocator = $container->get(ConnectionLocator::class);
 
         // Factory
-        $container = $core->getServiceContainer();
         $factory = function ($class) use ($container) {
             if ($container->has($class)) {
                 return $container->get($class);
@@ -168,7 +147,7 @@ class AtlasPackage extends AbstractPackage
 
         // Debug activate?
         if ($core->getConfig()->get('berlioz.debug.enable', false)) {
-            self::$debugSection->setAtlas($atlas);
+            $core->getDebug()->addSection(new AtlasSection($atlas));
         }
 
         return $atlas;
@@ -177,15 +156,15 @@ class AtlasPackage extends AbstractPackage
     /**
      * Add connections to connection locator.
      *
-     * @param Core $core
+     * @param Config $config
      * @param ConnectionLocator $connectionLocator
      * @param string $type
      *
      * @throws ConfigException
      */
-    private static function addConnections(Core $core, ConnectionLocator $connectionLocator, string $type)
+    private static function addConnections(Config $config, ConnectionLocator $connectionLocator, string $type)
     {
-        $specs = $core->getConfig()->get(sprintf('atlas.pdo.connection_locator.%s', $type), []);
+        $specs = $config->get(sprintf('atlas.pdo.connection_locator.%s', $type), []);
         $method = 'set' . ucfirst($type) . 'Factory';
 
         foreach ($specs as $name => $spec) {
@@ -201,7 +180,7 @@ class AtlasPackage extends AbstractPackage
      *
      * @return array
      */
-    private static function getPdoArgs(array $spec)
+    private static function getPdoArgs(array $spec): array
     {
         return [
             $spec['dsn'] ?? null,
@@ -219,13 +198,11 @@ class AtlasPackage extends AbstractPackage
      * @return EntityManager
      * @throws ConfigException
      */
-    public static function transitFactory(Core $core)
+    public static function transitFactory(Core $core): EntityManager
     {
         /** @var Atlas $atlas */
-        $atlas = $core->getServiceContainer()->get(Atlas::class);
-        $transit = EntityManager::new($atlas, (string)$core->getConfig()->get('atlas.cli.config.input.namespace'));
-        $transit->setCore($core);
+        $atlas = $core->getContainer()->get(Atlas::class);
 
-        return $transit;
+        return EntityManager::new($atlas, (string)$core->getConfig()->get('atlas.cli.config.input.namespace'));
     }
 }

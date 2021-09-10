@@ -23,8 +23,7 @@ namespace Berlioz\Package\Atlas;
  */
 trait EntityManagerAwareTrait
 {
-    /** @var EntityManager Entity manager */
-    protected $entityManager;
+    protected EntityManager $entityManager;
 
     /**
      * Get entity manager.
@@ -33,21 +32,17 @@ trait EntityManagerAwareTrait
      */
     public function getEntityManager(): ?EntityManager
     {
-        return $this->entityManager;
+        return $this->entityManager ?? null;
     }
 
     /**
      * Set entity manager.
      *
      * @param EntityManager $entityManager
-     *
-     * @return static
      */
-    public function setEntityManager(EntityManager $entityManager)
+    public function setEntityManager(EntityManager $entityManager): void
     {
         $this->entityManager = $entityManager;
-
-        return $this;
     }
 
     /**

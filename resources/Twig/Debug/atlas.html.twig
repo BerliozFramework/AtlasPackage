@@ -1,38 +1,27 @@
 {% extends "@Berlioz-HttpCore/Twig/Debug/_main.html.twig" %}
 
 {% block menu %}
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-database">
-        <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
-        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
-    </svg>
-    {{ section.sectionName }} ({{ section|length }})
+    <span class="nav-icon">
+        <i class="bi bi-server"></i>
+        {% if section|length > 0 %}
+            <span class="badge bg-primary">{{ section|length }}</span>
+        {% endif %}
+    </span>
+    <span class="nav-text">{{ section.sectionName }}</span>
 {% endblock %}
 
 {% block widget %}
     <div class="d-flex align-items-center mb-3">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-             class="feather feather-lg feather-database">
-            <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
-            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
-        </svg>
-        <p class="card-value ml-3 mb-0">{{ section|length }} <small>queries</small></p>
+        <i class="bi bi-server fs-1 me-3"></i>
+        <p class="card-value mb-0">{{ section|length }} <small>queries</small></p>
     </div>
     <div class="d-flex align-items-center mt-3">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-             class="feather feather-lg feather-clock">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-        </svg>
+        <i class="bi bi-clock-history fs-1 me-3"></i>
         <p class="card-value ml-3 mb-0">
             {% if section.duration == 0 %}
                 --
             {% else %}
-                {{ (section.duration * 1000)|round(3) }}ms
+                {{ (section.duration * 1000)|round(3) }} ms
             {% endif %}
         </p>
     </div>
@@ -40,9 +29,13 @@
 
 {% block main %}
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1>{{ section.sectionName }}</h1>
+        <h1>
+            {{ section.sectionName }}
+            {% if section|length > 0 %}
+                <span class="badge bg-primary">{{ section|length }}</span>
+            {% endif %}
+        </h1>
     </div>
-
     <p>
         It's a snapshot of database queries at the moment of request.
     </p>
@@ -54,30 +47,19 @@
     {% else %}
         <div class="row justify-content-center">
             <div class="col-12 col-sm-6 col-md-4 mb-3">
-                <div class="card bg-dark text-white text-center">
+                <div class="card text-center">
                     <div class="card-body">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                             class="feather feather-lg feather-database">
-                            <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-                            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
-                            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
-                        </svg>
+                        <i class="bi bi-server fs-1"></i>
                         <p class="card-value mb-0">{{ section|length }}</p>
                         <p class="card-text">queries</p>
                     </div>
                 </div>
             </div>
             <div class="col-12 col-sm-6 col-md-4 mb-3">
-                <div class="card bg-dark text-white text-center">
+                <div class="card text-center">
                     <div class="card-body">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                             class="feather feather-lg feather-clock">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                        <p class="card-value mb-0">{{ (section.duration * 1000)|round(3) }}ms</p>
+                        <i class="bi bi-clock-history fs-1"></i>
+                        <p class="card-value mb-0">{{ (section.duration * 1000)|round(3) }} ms</p>
                         <p class="card-text">Execution time</p>
                     </div>
                 </div>
@@ -85,7 +67,7 @@
         </div>
 
         <div class="table-responsive">
-            <table class="table border-bottom">
+            <table class="table table-striped">
                 <thead>
                 <tr>
                     <th>#</th>
@@ -101,16 +83,27 @@
                 {% set limitWarning = avgDuration * 1.15 %}
                 {% set limitDanger = 0.1 %}
                 {% for query in section.queries %}
-                    <tr class="{% if query.duration > limitDanger %}table-danger{% elseif query.duration > limitWarning %}table-warning{% endif %}">
+                    <tr>
                         <th>{{ loop.index }}</th>
                         <td>{{ query.connection }}</td>
-                        <td>{{ (query.duration * 1000)|round(3) }}ms</td>
+                        <td class="text-nowrap">
+                            {% if query.duration > limitDanger %}
+                                <i data-bs-toggle="tooltip"
+                                   title="Very slow query"
+                                   class="bi bi-exclamation-triangle-fill text-danger"></i>
+                            {% elseif query.duration > limitWarning %}
+                                <i data-bs-toggle="tooltip"
+                                   title="Slow query"
+                                   class="bi bi-exclamation-triangle-fill text-warning"></i>
+                            {% endif %}
+                            {{ (query.duration * 1000)|round(3) }}ms
+                        </td>
                         <td>
                             <pre class="mb-0"><code>{{ query.statement }}</code></pre>
                         </td>
                         <td>
                             {% if query.values|length > 0 %}
-                                <table class="table table-sm table-bordered mb-0">
+                                <table class="table table-striped table-sm table-bordered mb-0">
                                     <thead>
                                     <tr>
                                         <th scope="col">Key</th>
@@ -131,15 +124,14 @@
                             {% endif %}
                         </td>
                         <td class="text-right">
-                            <button class="btn btn-secondary" data-toggle="modal" data-target="#atlasDetail"
-                                    data-detail="{{ query.trace|trim }}">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                     stroke-linejoin="round" class="feather feather-search">
-                                    <circle cx="11" cy="11" r="8"></circle>
-                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                                </svg>
-                            </button>
+                            {% if query.trace %}
+                                <button class="btn btn-sm btn-outline-secondary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#atlasDetail"
+                                        data-detail="{{ query.trace|trim }}">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}
@@ -155,15 +147,13 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="atlasDetailTitle">Statement trace</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <pre></pre>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -172,13 +162,10 @@
 
 {% block inlineJscripts %}
     <script>
-        $('#atlasDetail')
-            .on('show.bs.modal', function (event) {
-                var button = $(event.relatedTarget);
-                var recipient = button.data('detail');
-                var modal = $(this);
-
-                modal.find('.modal-body pre').html(recipient);
-            })
+        var modalEl = document.getElementById('atlasDetail');
+        modalEl.addEventListener('show.bs.modal', function (event) {
+            console.log(event.relatedTarget.dataset.detail);
+            modalEl.querySelector('.modal-body pre').innerHTML = event.relatedTarget.dataset.detail;
+        })
     </script>
 {% endblock %}

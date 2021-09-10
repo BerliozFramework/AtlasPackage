@@ -14,11 +14,6 @@ declare(strict_types=1);
 
 namespace Berlioz\Package\Atlas\Repository;
 
-/**
- * Interface RepositoryInterface.
- *
- * @package Berlioz\Package\Atlas\Repository
- */
 interface RepositoryInterface
 {
 }
