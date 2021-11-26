@@ -109,12 +109,24 @@ class Atlas extends AbstractSection implements Section, Countable, CoreAwareInte
         return '@Berlioz-AtlasPackage/Twig/Debug/atlas.html.twig';
     }
 
+    public function __serialize(): array
+    {
+        return [
+            'queries' => $this->queries
+        ];
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $this->queries = $data['queries'] ?? [];
+    }
+
     /**
      * @inheritdoc
      */
     public function serialize()
     {
-        return serialize(['queries' => $this->queries]);
+        return serialize($this->__serialize());
     }
 
     /**
@@ -122,9 +134,7 @@ class Atlas extends AbstractSection implements Section, Countable, CoreAwareInte
      */
     public function unserialize($serialized)
     {
-        $unserialized = unserialize($serialized);
-
-        $this->queries = $unserialized['queries'] ?? [];
+        $this->__unserialize(unserialize($serialized));
     }
 
     ///////////////////////////
@@ -134,7 +144,7 @@ class Atlas extends AbstractSection implements Section, Countable, CoreAwareInte
     /**
      * @inheritdoc
      */
-    public function count()
+    public function count(): int
     {
         return count($this->getQueries());
     }
