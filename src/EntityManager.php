@@ -64,6 +64,22 @@ class EntityManager extends Transit implements CoreAwareInterface
     }
 
     /**
+     * Detach a domain object to plan.
+     *
+     * @param object $domain
+     *
+     * @return EntityManager
+     */
+    public function detach(object $domain): EntityManager
+    {
+        if ($this->plan->contains($domain)) {
+            $this->plan->detach($domain);
+        }
+
+        return $this;
+    }
+
+    /**
      * Get repository.
      *
      * @param string $class
