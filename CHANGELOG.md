@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. This projec
 to [Semantic Versioning] (http://semver.org/). For change log format,
 use [Keep a Changelog] (http://keepachangelog.com/).
 
+## [1.1.0] - 2026-01-07
+
+### Changed
+
+- Update minimum stability
+- Update atlas/transit version
+
 ## [1.0.0] - 2025-06-25
 
 ### Added
